@@ -6,3 +6,5 @@ A throwaway repository to try GitHub workflows (CodeQL, OpenSSF Scorecard, badge
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jeannos/ci-testing/badge)](https://scorecard.dev/viewer/?uri=github.com/jeannos/ci-testing)
 [![coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jeannos/ci-testing/badges/coverage.json)](https://github.com/jeannos/ci-testing)
 [![licence](https://img.shields.io/github/license/jeannos/ci-testing)](LICENSE)
+
+Commits here are signed, and the default branch is protected by rule sets.
