@@ -1,0 +1,48 @@
+# CodeQL: the static analysis of GitHub, on the C sources. It watches a real build, so the
+# build dependencies are installed and the project is built by its Makefile.
+#  - pull requests: the alerts a change adds
+#  - the default branch: the baseline the pull requests are compared with
+#  - every week: the queries are updated between releases of the project
+# The only action used is GitHub's own, pinned to a commit.
+name: codeql
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+  schedule:
+    - cron: "41 5 * * 3"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: analyze (c-cpp)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        run: |
+          git init -q .
+          git -c "http.extraHeader=Authorization: Basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 | tr -d '\n')" \
+            fetch -q --depth 1 "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$GITHUB_SHA"
+          git checkout -q FETCH_HEAD && git log --oneline -1
+      - name: Install build dependencies
+        run: sudo apt-get -qq update && sudo apt-get -qq install -y --no-install-recommends libarchive-dev >/dev/null
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: c-cpp
+          build-mode: manual
+          queries: security-extended
+      - name: Build
+        run: make binaries
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: "/language:c-cpp"
